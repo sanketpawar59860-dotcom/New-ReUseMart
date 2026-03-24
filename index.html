@@ -1,0 +1,2549 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReUseMart - Multi-Purpose Marketplace</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; }
+    body { font-family: 'Segoe UI', 'Helvetica Neue', sans-serif; background: #f5f5f5; }
+    
+   .app-wrapper { 
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background: #fafafa; 
+}
+    
+    /* Brand Colors */
+    :root {
+      --primary: #FF6B35;
+      --secondary: #004E89;
+      --accent: #1AC8ED;
+      --success: #06D6A0;
+      --text-dark: #1F2937;
+      --text-light: #6B7280;
+      --border-light: #E5E7EB;
+    }
+    
+    /* Smooth Transitions */
+    .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    /* Product Card Hover */
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    /* Button Styles */
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .btn-primary:hover { background: #E55A2B; }
+    
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .btn-secondary:hover { background: #003A63; }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 2px solid var(--primary);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-outline:hover { 
+      background: var(--primary); 
+      color: white;
+    }
+    
+    /* Badge Styles */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-success { background: #D1FAE5; color: #065F46; }
+    .badge-warning { background: #FEF3C7; color: #92400E; }
+    .badge-info { background: #DBEAFE; color: #1E40AF; }
+    
+    /* Rating Style */
+    .rating { color: #FCD34D; font-size: 14px; font-weight: 600; }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    /* Animations */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-in { animation: slideIn 0.4s ease-out; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+    
+    /* Loading Spinner */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Sticky Header */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Price Display */
+    .price-display {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .price-original {
+      text-decoration: line-through;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+    .price-current {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .price-savings {
+      background: #FEE2E2;
+      color: #991B1B;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    /* Grid */
+    .grid-responsive {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-responsive {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+      }
+    }
+    
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border-light); }
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-light);
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--success);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease-out;
+      z-index: 999;
+      max-width: 400px;
+    }
+    
+    /* Section Spacing */
+    .section { padding: 30px 20px; }
+    
+    /* Hero Banner */
+    .hero {
+      background: linear-gradient(135deg, #FF6B35 0%, #004E89 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    
+    /* Category Grid */
+    .category-item {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .category-item:hover {
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+    .category-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body>
+  <div class="app-wrapper h-full w-full overflow-auto"><!-- HEADER -->
+   <header class="sticky-header">
+    <div class="bg-gradient-to-r from-[#FF6B35] to-[#004E89] text-white">
+     <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+       <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+        <div class="text-2xl font-bold">
+         🔄
+        </div>
+        <div>
+         <div id="app-title" class="font-bold text-xl">
+          ReUseMart
+         </div>
+         <div id="app-tagline" class="text-xs opacity-90">
+          Buy New • Sell Used • Rent Smart
+         </div>
+        </div>
+       </div><!-- Search Bar -->
+       <div class="flex-1 max-w-sm hidden sm:block">
+        <div class="flex"><input type="text" id="search-input" placeholder="Search products..." class="flex-1 px-4 py-2 rounded-l-lg text-gray-800" onkeyup="handleSearch()"> <button onclick="handleSearch()" class="bg-white text-[#FF6B35] px-4 py-2 rounded-r-lg font-600"> <i data-lucide="search" style="width: 20px; height: 20px;"></i> </button>
+        </div>
+       </div><!-- Icons -->
+       <div class="flex gap-3 items-center"><button class="relative p-2 hover:bg-white hover:bg-opacity-20 rounded-lg" onclick="toggleWishlist()"> <i data-lucide="heart" style="width: 24px; height: 24px;"></i> <span id="wishlist-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">0</span> </button> <button class="relative p-2 hover:bg-white hover:bg-opacity-20 rounded-lg" onclick="toggleCart()"> <i data-lucide="shopping-cart" style="width: 24px; height: 24px;"></i> <span id="cart-badge" class="absolute top-0 right-0 bg-yellow-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">0</span> </button> <button class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg" onclick="toggleUser()"> <i data-lucide="user" style="width: 24px; height: 24px;"></i> </button>
+       </div>
+      </div>
+     </div>
+    </div><!-- Main Tabs -->
+    <div class="bg-white border-b border-gray-200">
+     <div class="max-w-6xl mx-auto px-4 flex"><button class="tab-btn active" onclick="switchMode('buy')"> <i data-lucide="shopping-bag" style="width: 18px; height: 18px; display: inline; margin-right: 6px;"></i>Buy </button> <button class="tab-btn" onclick="switchMode('sell')"> <i data-lucide="tag" style="width: 18px; height: 18px; display: inline; margin-right: 6px;"></i>Sell </button> <button class="tab-btn" onclick="switchMode('rent')"> <i data-lucide="calendar" style="width: 18px; height: 18px; display: inline; margin-right: 6px;"></i>Rent </button>
+     </div>
+    </div>
+   </header><!-- MAIN CONTENT -->
+   <main><!-- HOME PAGE -->
+    <div id="home-page" class="hidden"><!-- Hero Banner -->
+     <div class="hero">
+      <h1 class="text-4xl font-bold mb-4">Welcome to ReUseMart</h1>
+      <p class="text-lg opacity-90 mb-6">Shop Smart. Sell Easy. Rent Flexible.</p>
+      <div class="flex gap-4 justify-center flex-wrap"><button class="btn-primary" onclick="switchMode('buy')">Start Buying</button> <button class="btn-outline text-white border-white hover:bg-white hover:text-[#FF6B35]" onclick="switchMode('sell')">Sell Items</button>
+      </div>
+     </div><!-- Featured Categories -->
+     <div class="section">
+      <h2 class="text-3xl font-bold mb-6 text-center">Shop by Category</h2>
+      <div class="grid-responsive max-w-6xl mx-auto">
+       <div class="category-item animate-slide-in" onclick="filterByCategory('Electronics')">
+        <div class="category-icon">
+         📱
+        </div>
+        <h3 class="font-bold">Electronics</h3>
+        <p class="text-sm text-gray-600">1,250 items</p>
+       </div>
+       <div class="category-item animate-slide-in" onclick="filterByCategory('Fashion')" style="animation-delay: 0.1s">
+        <div class="category-icon">
+         👔
+        </div>
+        <h3 class="font-bold">Fashion</h3>
+        <p class="text-sm text-gray-600">890 items</p>
+       </div>
+       <div class="category-item animate-slide-in" onclick="filterByCategory('Furniture')" style="animation-delay: 0.2s">
+        <div class="category-icon">
+         🪑
+        </div>
+        <h3 class="font-bold">Furniture</h3>
+        <p class="text-sm text-gray-600">456 items</p>
+       </div>
+       <div class="category-item animate-slide-in" onclick="filterByCategory('Books')" style="animation-delay: 0.3s">
+        <div class="category-icon">
+         📚
+        </div>
+        <h3 class="font-bold">Books</h3>
+        <p class="text-sm text-gray-600">2,130 items</p>
+       </div>
+       <div class="category-item animate-slide-in" onclick="filterByCategory('Vehicles')" style="animation-delay: 0.4s">
+        <div class="category-icon">
+         🏍️
+        </div>
+        <h3 class="font-bold">Vehicles</h3>
+        <p class="text-sm text-gray-600">342 items</p>
+       </div>
+       <div class="category-item animate-slide-in" onclick="filterByCategory('Home Appliances')" style="animation-delay: 0.5s">
+        <div class="category-icon">
+         🏠
+        </div>
+        <h3 class="font-bold">Home Appliances</h3>
+        <p class="text-sm text-gray-600">678 items</p>
+       </div>
+      </div>
+     </div><!-- Trending Products -->
+     <div class="section bg-gradient-to-r from-blue-50 to-indigo-50">
+      <h2 class="text-3xl font-bold mb-6 text-center">Trending Now</h2>
+      <div class="grid-responsive max-w-6xl mx-auto" id="trending-products"></div>
+     </div><!-- Value Props -->
+     <div class="section">
+      <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+       <div class="text-center">
+        <div class="text-5xl mb-4">
+         ✨
+        </div>
+        <h3 class="font-bold text-lg mb-2">New &amp; Used</h3>
+        <p class="text-gray-600">Buy fresh or pre-loved items at great prices</p>
+       </div>
+       <div class="text-center">
+        <div class="text-5xl mb-4">
+         💰
+        </div>
+        <h3 class="font-bold text-lg mb-2">Best Prices</h3>
+        <p class="text-gray-600">Discounts up to 70% on selected items</p>
+       </div>
+       <div class="text-center">
+        <div class="text-5xl mb-4">
+         🔄
+        </div>
+        <h3 class="font-bold text-lg mb-2">Rental Option</h3>
+        <p class="text-gray-600">Rent daily, weekly, or monthly as you need</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- BROWSE PAGE -->
+    <div id="browse-page" class="hidden">
+     <div class="max-w-6xl mx-auto px-4 py-6">
+      <div class="flex gap-6"><!-- Sidebar Filters -->
+       <aside class="hidden lg:block w-64 min-h-screen">
+        <div class="bg-white p-6 rounded-lg sticky top-20">
+         <h3 class="font-bold text-lg mb-4">Filters</h3><!-- Category Filter -->
+         <div class="mb-6"><label class="font-bold text-sm block mb-3">Category</label>
+          <div class="space-y-2"><label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Electronics" onchange="applyFilters()"> Electronics </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Fashion" onchange="applyFilters()"> Fashion </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Furniture" onchange="applyFilters()"> Furniture </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Books" onchange="applyFilters()"> Books </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Vehicles" onchange="applyFilters()"> Vehicles </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Home Appliances" onchange="applyFilters()"> Home Appliances </label>
+          </div>
+         </div><!-- Price Filter -->
+         <div class="mb-6"><label class="font-bold text-sm block mb-3">Price Range</label> <input type="range" min="0" max="100000" step="1000" id="price-filter" oninput="applyFilters()" class="w-full">
+          <div class="flex justify-between text-xs text-gray-600 mt-2"><span>₹0</span> <span id="price-display">₹100,000</span>
+          </div>
+         </div><!-- Condition Filter -->
+         <div class="mb-6"><label class="font-bold text-sm block mb-3">Condition</label>
+          <div class="space-y-2"><label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="New" onchange="applyFilters()"> New </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Used" onchange="applyFilters()"> Used </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="Refurbished" onchange="applyFilters()"> Refurbished </label>
+          </div>
+         </div><!-- Rating Filter -->
+         <div class="mb-6"><label class="font-bold text-sm block mb-3">Rating</label>
+          <div class="space-y-2"><label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="4.5" onchange="applyFilters()"> ⭐ 4.5 &amp; up </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="4" onchange="applyFilters()"> ⭐ 4.0 &amp; up </label> <label class="flex items-center gap-2 cursor-pointer"> <input type="checkbox" value="3.5" onchange="applyFilters()"> ⭐ 3.5 &amp; up </label>
+          </div>
+         </div><button onclick="clearFilters()" class="btn-outline w-full">Clear Filters</button>
+        </div>
+       </aside><!-- Products Grid -->
+       <div class="flex-1">
+        <div class="flex justify-between items-center mb-6">
+         <h2 class="text-2xl font-bold" id="browse-title">Products</h2><select onchange="handleSort()" class="px-4 py-2 border border-gray-300 rounded-lg"> <option value="relevance">Relevance</option> <option value="price-low">Price: Low to High</option> <option value="price-high">Price: High to Low</option> <option value="rating">Top Rated</option> <option value="newest">Newest</option> </select>
+        </div>
+        <div id="products-container" class="grid-responsive"></div>
+        <div id="no-products" class="text-center py-12 hidden">
+         <p class="text-gray-600 text-lg">No products found. Try adjusting your filters.</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- PRODUCT DETAILS PAGE -->
+    <div id="product-detail-page" class="hidden">
+     <div class="max-w-6xl mx-auto px-4 py-6"><button onclick="goHome()" class="mb-6 text-blue-600 font-600 flex items-center gap-2"> <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i> Back </button>
+      <div class="grid md:grid-cols-2 gap-8 bg-white p-8 rounded-lg"><!-- Image -->
+       <div><img id="detail-image" src="" alt="" class="w-full h-96 object-cover rounded-lg mb-4" loading="lazy" onerror="this.src='https://via.placeholder.com/400?text=Product+Image'">
+        <div class="grid grid-cols-4 gap-2"><img src="" alt="" class="w-20 h-20 object-cover rounded cursor-pointer border border-gray-300 hover:border-blue-500" onclick="showDetailImage(this)">
+        </div>
+       </div><!-- Details -->
+       <div>
+        <div id="detail-badges" class="mb-4 flex gap-2"></div>
+        <h1 id="detail-name" class="text-3xl font-bold mb-2"></h1>
+        <div class="flex gap-4 items-center mb-6">
+         <div class="rating" id="detail-rating"></div><span class="text-gray-600">(<span id="detail-reviews">0</span> reviews)</span> <span class="text-gray-600" id="detail-seller"></span>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+         <div id="detail-price" class="mb-4"></div>
+         <p id="detail-desc" class="text-gray-700 mb-6"></p>
+         <div class="mb-6"><label class="block font-bold mb-2">Quantity:</label>
+          <div class="flex gap-2"><button class="px-4 py-2 border border-gray-300 rounded" onclick="decreaseQty()">−</button> <input type="number" id="detail-qty" value="1" min="1" class="px-4 py-2 border border-gray-300 rounded w-20 text-center"> <button class="px-4 py-2 border border-gray-300 rounded" onclick="increaseQty()">+</button>
+          </div>
+         </div>
+         <div id="detail-actions" class="flex gap-4"></div>
+        </div><!-- Product Info -->
+        <div class="space-y-4 border-t pt-6">
+         <div><label class="font-bold">Brand:</label>
+          <p id="detail-brand" class="text-gray-700"></p>
+         </div>
+         <div><label class="font-bold">Category:</label>
+          <p id="detail-category" class="text-gray-700"></p>
+         </div>
+         <div><label class="font-bold">Condition:</label>
+          <p id="detail-condition" class="text-gray-700"></p>
+         </div>
+         <div><label class="font-bold">Warranty:</label>
+          <p id="detail-warranty" class="text-gray-700"></p>
+         </div>
+        </div><!-- Reviews Section -->
+        <div class="mt-8 border-t pt-6">
+         <h3 class="font-bold text-lg mb-4">Customer Reviews</h3>
+         <div id="detail-reviews-list" class="space-y-4"><!-- Reviews will be populated here -->
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- CART PAGE -->
+    <div id="cart-page" class="hidden">
+     <div class="max-w-6xl mx-auto px-4 py-6">
+      <h2 class="text-3xl font-bold mb-6">Shopping Cart</h2>
+      <div class="grid lg:grid-cols-3 gap-8">
+       <div class="lg:col-span-2">
+        <div id="cart-items" class="bg-white rounded-lg p-6 space-y-6"><!-- Cart items will be populated here -->
+        </div>
+        <div id="empty-cart" class="text-center py-12">
+         <p class="text-gray-600 text-lg mb-4">Your cart is empty</p><button onclick="goHome()" class="btn-primary">Continue Shopping</button>
+        </div>
+       </div><!-- Cart Summary -->
+       <div class="bg-white rounded-lg p-6 h-fit sticky top-24">
+        <h3 class="font-bold text-lg mb-4">Order Summary</h3>
+        <div class="space-y-3 mb-6">
+         <div class="flex justify-between"><span>Subtotal:</span> <span id="subtotal">₹0</span>
+         </div>
+         <div class="flex justify-between"><span>Discount:</span> <span id="discount" class="text-green-600">−₹0</span>
+         </div>
+         <div class="flex justify-between"><span>Shipping:</span> <span id="shipping">FREE</span>
+         </div>
+         <div class="border-t pt-3 flex justify-between font-bold text-lg"><span>Total:</span> <span id="total">₹0</span>
+         </div>
+        </div><button onclick="checkout()" class="btn-primary w-full mb-2">Proceed to Checkout</button> <button onclick="goHome()" class="btn-outline w-full">Continue Shopping</button>
+       </div>
+      </div>
+     </div>
+    </div><!-- WISHLIST PAGE -->
+    <div id="wishlist-page" class="hidden">
+     <div class="max-w-6xl mx-auto px-4 py-6">
+      <h2 class="text-3xl font-bold mb-6">My Wishlist</h2>
+      <div id="wishlist-items" class="grid-responsive"></div>
+      <div id="empty-wishlist" class="text-center py-12 hidden">
+       <p class="text-gray-600 text-lg mb-4">Your wishlist is empty</p><button onclick="goHome()" class="btn-primary">Start Shopping</button>
+      </div>
+     </div>
+    </div><!-- SELLER DASHBOARD -->
+    <div id="seller-page" class="hidden">
+     <div class="max-w-6xl mx-auto px-4 py-6">
+      <h2 class="text-3xl font-bold mb-6">Seller Dashboard</h2>
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+       <div class="bg-white p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Total Listings</p>
+        <p class="text-3xl font-bold" id="seller-listings">0</p>
+       </div>
+       <div class="bg-white p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Total Sales</p>
+        <p class="text-3xl font-bold" id="seller-sales">₹0</p>
+       </div>
+       <div class="bg-white p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Active Orders</p>
+        <p class="text-3xl font-bold" id="seller-orders">0</p>
+       </div>
+       <div class="bg-white p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Rating</p>
+        <p class="text-3xl font-bold rating">4.8</p>
+       </div>
+      </div><!-- Add Item Form -->
+      <div class="bg-white rounded-lg p-8 mb-8">
+       <h3 class="font-bold text-xl mb-6">List a New Item</h3>
+       <form onsubmit="addSellerItem(event)" class="space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+         <div><label class="block font-bold mb-2">Item Name</label> <input type="text" id="seller-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+         </div>
+         <div><label class="block font-bold mb-2">Brand</label> <input type="text" id="seller-brand" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+         </div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+         <div><label class="block font-bold mb-2">Category</label> <select id="seller-category" required class="w-full px-4 py-2 border border-gray-300 rounded-lg"> <option>Electronics</option> <option>Fashion</option> <option>Furniture</option> <option>Books</option> <option>Vehicles</option> <option>Home Appliances</option> </select>
+         </div>
+         <div><label class="block font-bold mb-2">Condition</label> <select id="seller-condition" required class="w-full px-4 py-2 border border-gray-300 rounded-lg"> <option>New</option> <option>Used</option> <option>Refurbished</option> </select>
+         </div>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+         <div><label class="block font-bold mb-2">Buy Price (₹)</label> <input type="number" id="seller-buy-price" placeholder="0" step="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+         </div>
+         <div><label class="block font-bold mb-2">Sell Price (₹)</label> <input type="number" id="seller-sell-price" placeholder="0" step="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+         </div>
+         <div><label class="block font-bold mb-2">Rent Price/Day (₹)</label> <input type="number" id="seller-rent-price" placeholder="0" step="50" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+         </div>
+        </div>
+        <div><label class="block font-bold mb-2">Description</label> <textarea id="seller-description" required rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Describe your item..."></textarea>
+        </div><button type="submit" class="btn-primary">List Item</button>
+       </form>
+      </div><!-- My Listings -->
+      <h3 class="font-bold text-xl mb-4">My Listings</h3>
+      <div id="seller-items" class="grid-responsive"></div>
+     </div>
+    </div><!-- ADMIN DASHBOARD -->
+    <div id="admin-page" class="hidden">
+     <div class="max-w-6xl mx-auto px-4 py-6">
+      <h2 class="text-3xl font-bold mb-6">Admin Panel</h2>
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+       <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Total Users</p>
+        <p class="text-3xl font-bold">2,547</p>
+       </div>
+       <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Total Products</p>
+        <p class="text-3xl font-bold" id="admin-products">0</p>
+       </div>
+       <div class="bg-purple-50 border-l-4 border-purple-500 p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Total Revenue</p>
+        <p class="text-3xl font-bold">₹45.2L</p>
+       </div>
+       <div class="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-lg">
+        <p class="text-gray-600 text-sm">Pending Orders</p>
+        <p class="text-3xl font-bold">123</p>
+       </div>
+      </div><!-- Recent Orders -->
+      <div class="bg-white rounded-lg p-6 mb-8">
+       <h3 class="font-bold text-lg mb-4">Recent Orders</h3>
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-gray-50">
+          <tr>
+           <th class="px-4 py-2 text-left font-bold">Order ID</th>
+           <th class="px-4 py-2 text-left font-bold">Customer</th>
+           <th class="px-4 py-2 text-left font-bold">Amount</th>
+           <th class="px-4 py-2 text-left font-bold">Status</th>
+          </tr>
+         </thead>
+         <tbody>
+          <tr class="border-b">
+           <td class="px-4 py-3">#ORD-2024-001</td>
+           <td class="px-4 py-3">Raj Kumar</td>
+           <td class="px-4 py-3">₹15,999</td>
+           <td class="px-4 py-3"><span class="badge badge-success">Delivered</span></td>
+          </tr>
+          <tr class="border-b">
+           <td class="px-4 py-3">#ORD-2024-002</td>
+           <td class="px-4 py-3">Priya Singh</td>
+           <td class="px-4 py-3">₹8,499</td>
+           <td class="px-4 py-3"><span class="badge badge-warning">Processing</span></td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div><!-- Content Moderation -->
+      <div class="bg-white rounded-lg p-6">
+       <h3 class="font-bold text-lg mb-4">Content Moderation</h3>
+       <div class="space-y-4">
+        <div class="flex justify-between items-center p-4 bg-red-50 rounded-lg">
+         <div>
+          <p class="font-bold">Reported Listing: Counterfeit iPhone</p>
+          <p class="text-sm text-gray-600">Seller: ElectroWorld | 5 reports</p>
+         </div>
+         <div class="flex gap-2"><button class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold">Remove</button> <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold">Review</button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- USER MENU MODAL -->
+    <div id="user-modal" class="modal-overlay">
+     <div class="modal-content">
+      <div class="flex justify-between items-center mb-6">
+       <h2 class="text-2xl font-bold">Account</h2><button onclick="toggleUser()" class="text-gray-600"> <i data-lucide="x" style="width: 24px; height: 24px;"></i> </button>
+      </div>
+      <div class="space-y-3">
+       <div class="p-4 bg-gray-100 rounded-lg">
+        <p class="text-sm text-gray-600">Logged in as</p>
+        <p class="font-bold" id="user-email">Guest User</p>
+       </div><button onclick="switchUserRole('buyer')" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg flex items-center gap-2"> <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
+        <div>
+         <p class="font-bold">Buyer Dashboard</p>
+         <p class="text-xs text-gray-600">Browse &amp; purchase items</p>
+        </div></button> <button onclick="switchUserRole('seller')" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg flex items-center gap-2"> <i data-lucide="tag" style="width: 20px; height: 20px;"></i>
+        <div>
+         <p class="font-bold">Seller Dashboard</p>
+         <p class="text-xs text-gray-600">Manage your listings</p>
+        </div></button> <button onclick="switchUserRole('admin')" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg flex items-center gap-2"> <i data-lucide="shield" style="width: 20px; height: 20px;"></i>
+        <div>
+         <p class="font-bold">Admin Panel</p>
+         <p class="text-xs text-gray-600">Manage platform</p>
+        </div></button> <button onclick="logout()" class="w-full text-left p-3 hover:bg-red-50 rounded-lg text-red-600 flex items-center gap-2"> <i data-lucide="log-out" style="width: 20px; height: 20px;"></i> <p class="font-bold">Logout</p></button>
+      </div>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+    // ===== PRODUCT DATABASE =====
+    const PRODUCTS = [
+      // Electronics Category (25 products)
+      {
+        id: 'ELEC-001',
+        name: 'iPhone 15 Pro Max',
+        brand: 'Apple',
+        category: 'Electronics',
+        subcategory: 'Smartphones',
+        condition: 'New',
+        description: 'Latest flagship smartphone with advanced camera system',
+        fullDescription: 'Experience the pinnacle of smartphone technology with the iPhone 15 Pro Max. Featuring the new A18 Pro chip, titanium design, and an advanced camera system with improved zoom capabilities. Includes 256GB storage, ProMotion display, and emergency SOS via satellite.',
+        image: 'https://images.unsplash.com/photo-1592286927505-1def25e63e67?w=400&h=400&fit=crop',
+        buyPrice: 139999,
+        sellPrice: 89999,
+        rentPrice: 499,
+        discount: 0,
+        rating: 4.8,
+        reviews: 1250,
+        warranty: '1 Year',
+        seller: 'Apple Official',
+        tags: ['smartphone', 'latest', 'flagship']
+      },
+      {
+        id: 'ELEC-002',
+        name: 'Samsung Galaxy S24 Ultra',
+        brand: 'Samsung',
+        category: 'Electronics',
+        subcategory: 'Smartphones',
+        condition: 'New',
+        description: 'Premium Android smartphone with 200MP camera',
+        fullDescription: 'The Galaxy S24 Ultra combines power and creativity with its revolutionary 200MP camera, Vision Booster display, and powerful Snapdragon processor. 512GB storage, all-day battery, and One UI 6.',
+        image: 'https://images.unsplash.com/photo-1610945415295-d9bbf7ce3f1d?w=400&h=400&fit=crop',
+        buyPrice: 129999,
+        sellPrice: 79999,
+        rentPrice: 449,
+        discount: 5,
+        rating: 4.7,
+        reviews: 980,
+        warranty: '1 Year',
+        seller: 'Samsung India',
+        tags: ['smartphone', 'android', 'camera']
+      },
+      {
+        id: 'ELEC-003',
+        name: 'MacBook Pro 16" M4',
+        brand: 'Apple',
+        category: 'Electronics',
+        subcategory: 'Laptops',
+        condition: 'New',
+        description: 'Powerful laptop for professionals and creators',
+        fullDescription: 'The MacBook Pro 16" with M4 Max chip delivers exceptional performance. 36GB unified memory, 512GB SSD, 16-core GPU, and stunning Liquid Retina XDR display. Perfect for video editing, 3D rendering, and software development.',
+        image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
+        buyPrice: 249999,
+        sellPrice: 149999,
+        rentPrice: 899,
+        discount: 0,
+        rating: 4.9,
+        reviews: 520,
+        warranty: '1 Year',
+        seller: 'Apple India',
+        tags: ['laptop', 'professional', 'powerful']
+      },
+      {
+        id: 'ELEC-004',
+        name: 'Dell XPS 15 (Used)',
+        brand: 'Dell',
+        category: 'Electronics',
+        subcategory: 'Laptops',
+        condition: 'Used',
+        description: 'High-performance Windows laptop in excellent condition',
+        fullDescription: 'Dell XPS 15 with Intel Core i7, 16GB RAM, 512GB SSD. Excellent condition with minimal usage. Includes charger and original box. Perfect for work and gaming.',
+        image: 'https://images.unsplash.com/photo-1588872657840-790ff3bde4c5?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 65999,
+        rentPrice: 399,
+        discount: 0,
+        rating: 4.6,
+        reviews: 156,
+        warranty: '6 Months',
+        seller: 'TechHub Bangalore',
+        tags: ['laptop', 'used', 'i7', 'gaming']
+      },
+      {
+        id: 'ELEC-005',
+        name: 'Sony WH-1000XM5 Headphones',
+        brand: 'Sony',
+        category: 'Electronics',
+        subcategory: 'Audio',
+        condition: 'New',
+        description: 'Premium noise-cancelling wireless headphones',
+        fullDescription: 'Industry-leading noise cancellation, 30-hour battery life, and premium sound quality. Touch controls, multipoint connection, and AI-powered call quality. Perfect for travel and work.',
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+        buyPrice: 29999,
+        sellPrice: 19999,
+        rentPrice: 149,
+        discount: 15,
+        rating: 4.8,
+        reviews: 2340,
+        warranty: '2 Years',
+        seller: 'Sony Experience',
+        tags: ['headphones', 'wireless', 'noise-cancelling']
+      },
+      {
+        id: 'ELEC-006',
+        name: 'iPad Pro 12.9" M2',
+        brand: 'Apple',
+        category: 'Electronics',
+        subcategory: 'Tablets',
+        condition: 'New',
+        description: 'Powerful tablet for creative professionals',
+        fullDescription: 'iPad Pro with M2 chip, 512GB storage, 8GB RAM. Liquid Retina XDR display, ProMotion 120Hz, and Apple Pencil support. Ideal for design, video editing, and productivity.',
+        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop',
+        buyPrice: 84999,
+        sellPrice: 54999,
+        rentPrice: 399,
+        discount: 8,
+        rating: 4.7,
+        reviews: 890,
+        warranty: '1 Year',
+        seller: 'Apple Store',
+        tags: ['tablet', 'ipad', 'professional']
+      },
+      {
+        id: 'ELEC-007',
+        name: 'GoPro Hero 12 Black (Used)',
+        brand: 'GoPro',
+        category: 'Electronics',
+        subcategory: 'Cameras',
+        condition: 'Used',
+        description: 'Action camera in great condition',
+        fullDescription: 'GoPro Hero 12 Black with 5.3K video, rugged design, and advanced stabilization. Used but maintained well. Includes mounts and carrying case. Perfect for adventure enthusiasts.',
+        image: 'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 32999,
+        rentPrice: 299,
+        discount: 0,
+        rating: 4.5,
+        reviews: 234,
+        warranty: '3 Months',
+        seller: 'ActionCam Store',
+        tags: ['camera', 'gopro', 'action', 'used']
+      },
+      {
+        id: 'ELEC-008',
+        name: 'Samsung 65" 4K Smart TV',
+        brand: 'Samsung',
+        category: 'Electronics',
+        subcategory: 'TVs',
+        condition: 'New',
+        description: '4K QLED television with smart features',
+        fullDescription: '65-inch QLED display with 4K resolution, 120Hz refresh rate, and quantum dot technology. Smart TV with built-in apps (Netflix, YouTube, Prime), voice control, and gaming features.',
+        image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400&h=400&fit=crop',
+        buyPrice: 89999,
+        sellPrice: 59999,
+        rentPrice: 599,
+        discount: 20,
+        rating: 4.6,
+        reviews: 567,
+        warranty: '2 Years',
+        seller: 'Samsung Hub',
+        tags: ['tv', '4k', 'smart', 'entertainment']
+      },
+      {
+        id: 'ELEC-009',
+        name: 'Canon EOS R6 Camera',
+        brand: 'Canon',
+        category: 'Electronics',
+        subcategory: 'Cameras',
+        condition: 'New',
+        description: 'Professional mirrorless camera for photographers',
+        fullDescription: '20MP full-frame mirrorless camera with 4K 60fps video, in-body stabilization, and rapid AF. Weather-sealed body, dual SD card slots, and comprehensive autofocus. Ideal for photography and videography professionals.',
+        image: 'https://images.unsplash.com/photo-1606986628025-35d57e735ae0?w=400&h=400&fit=crop',
+        buyPrice: 195999,
+        sellPrice: 145999,
+        rentPrice: 1499,
+        discount: 0,
+        rating: 4.8,
+        reviews: 450,
+        warranty: '1 Year',
+        seller: 'Canon Direct',
+        tags: ['camera', 'professional', 'mirrorless']
+      },
+      {
+        id: 'ELEC-010',
+        name: 'Apple Watch Series 9',
+        brand: 'Apple',
+        category: 'Electronics',
+        subcategory: 'Wearables',
+        condition: 'New',
+        description: 'Advanced smartwatch with health tracking',
+        fullDescription: 'Apple Watch Series 9 with Always-On Retina display, blood oxygen monitoring, ECG app, and advanced fitness tracking. Water-resistant, all-day battery, and seamless iPhone integration.',
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
+        buyPrice: 40999,
+        sellPrice: 29999,
+        rentPrice: 199,
+        discount: 10,
+        rating: 4.7,
+        reviews: 1890,
+        warranty: '1 Year',
+        seller: 'Apple Watch Store',
+        tags: ['smartwatch', 'wearable', 'fitness']
+      },
+      {
+        id: 'ELEC-011',
+        name: 'Kindle Paperwhite',
+        brand: 'Amazon',
+        category: 'Electronics',
+        subcategory: 'E-Readers',
+        condition: 'New',
+        description: 'Premium e-reader with waterproof design',
+        fullDescription: 'Amazon Kindle Paperwhite with 6.8" display, waterproof design, and weeks of battery life. Adjustable warm light, 32GB storage for thousands of books.',
+        image: 'https://images.unsplash.com/photo-1507842217343-583f20270319?w=400&h=400&fit=crop',
+        buyPrice: 12999,
+        sellPrice: 8999,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.6,
+        reviews: 3450,
+        warranty: '1 Year',
+        seller: 'Amazon Store',
+        tags: ['ereader', 'kindle', 'books']
+      },
+      {
+        id: 'ELEC-012',
+        name: 'Oculus Meta Quest 3',
+        brand: 'Meta',
+        category: 'Electronics',
+        subcategory: 'VR Headsets',
+        condition: 'New',
+        description: 'Mixed reality headset for gaming and apps',
+        fullDescription: '128GB VR headset with advanced controllers, mixed reality capabilities, and access to 1000+ apps and games. All-day battery and comfortable design.',
+        image: 'https://images.unsplash.com/photo-1617638924702-92d37a439220?w=400&h=400&fit=crop',
+        buyPrice: 49999,
+        sellPrice: 39999,
+        rentPrice: 499,
+        discount: 0,
+        rating: 4.4,
+        reviews: 680,
+        warranty: '1 Year',
+        seller: 'Meta Store',
+        tags: ['vr', 'gaming', 'metaverse']
+      },
+      {
+        id: 'ELEC-013',
+        name: 'DJI Air 3S Drone (Used)',
+        brand: 'DJI',
+        category: 'Electronics',
+        subcategory: 'Drones',
+        condition: 'Used',
+        description: 'Professional drone with excellent condition',
+        fullDescription: 'DJI Air 3S with 48MP camera, 46-minute flight time, and professional stabilization. Used but well-maintained. Includes batteries, remote, and case.',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 69999,
+        rentPrice: 799,
+        discount: 0,
+        rating: 4.5,
+        reviews: 345,
+        warranty: '3 Months',
+        seller: 'DroneHub',
+        tags: ['drone', 'dji', 'camera', 'used']
+      },
+      {
+        id: 'ELEC-014',
+        name: 'RTX 4090 Graphics Card',
+        brand: 'NVIDIA',
+        category: 'Electronics',
+        subcategory: 'PC Components',
+        condition: 'New',
+        description: 'Ultra-high performance graphics card for gaming and rendering',
+        fullDescription: '24GB GDDR6X memory, exceptional performance for 4K gaming and content creation. PCIe 4.0, advanced cooling, and overclocking capabilities.',
+        image: 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=400&h=400&fit=crop',
+        buyPrice: 149999,
+        sellPrice: 99999,
+        rentPrice: null,
+        discount: 0,
+        rating: 4.9,
+        reviews: 890,
+        warranty: '3 Years',
+        seller: 'TechPro Store',
+        tags: ['gpu', 'gaming', 'rtx', 'performance']
+      },
+      {
+        id: 'ELEC-015',
+        name: 'Samsung Galaxy Buds2 Pro',
+        brand: 'Samsung',
+        category: 'Electronics',
+        subcategory: 'Audio',
+        condition: 'New',
+        description: 'Premium true wireless earbuds',
+        fullDescription: 'Galaxy Buds2 Pro with active noise cancellation, 360-degree audio, and 5-hour battery. Seamless Galaxy device integration, ambient awareness, and touch controls.',
+        image: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400&h=400&fit=crop',
+        buyPrice: 12999,
+        sellPrice: 8499,
+        rentPrice: 99,
+        discount: 20,
+        rating: 4.6,
+        reviews: 1567,
+        warranty: '1 Year',
+        seller: 'Samsung Store',
+        tags: ['earbuds', 'wireless', 'audio']
+      },
+      {
+        id: 'ELEC-016',
+        name: 'Asus Gaming Laptop ROG Strix',
+        brand: 'ASUS',
+        category: 'Electronics',
+        subcategory: 'Laptops',
+        condition: 'New',
+        description: 'High-performance gaming laptop',
+        fullDescription: 'ROG Strix with Intel Core i9, RTX 4090, 32GB RAM, 1TB SSD. 16" 240Hz display, advanced cooling, and premium build quality.',
+        image: 'https://images.unsplash.com/photo-1588872657840-790ff3bde4c5?w=400&h=400&fit=crop',
+        buyPrice: 249999,
+        sellPrice: 199999,
+        rentPrice: 1299,
+        discount: 0,
+        rating: 4.8,
+        reviews: 650,
+        warranty: '2 Years',
+        seller: 'ROG Store',
+        tags: ['laptop', 'gaming', 'asus', 'powerful']
+      },
+      {
+        id: 'ELEC-017',
+        name: 'LG 32" Curved Gaming Monitor (Refurbished)',
+        brand: 'LG',
+        category: 'Electronics',
+        subcategory: 'Monitors',
+        condition: 'Refurbished',
+        description: 'High refresh rate curved gaming display',
+        fullDescription: '32" 165Hz curved display with 1ms response time and AMD FreeSync. Professionally refurbished, works like new. Perfect for competitive gaming.',
+        image: 'https://images.unsplash.com/photo-1588872657840-790ff3bde4c5?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 29999,
+        rentPrice: 299,
+        discount: 0,
+        rating: 4.5,
+        reviews: 456,
+        warranty: '1 Year',
+        seller: 'RefurbishedTech',
+        tags: ['monitor', 'gaming', 'curved', 'refurbished']
+      },
+      {
+        id: 'ELEC-018',
+        name: 'Bose QuietComfort 45 Headphones (Used)',
+        brand: 'Bose',
+        category: 'Electronics',
+        subcategory: 'Audio',
+        condition: 'Used',
+        description: 'Premium noise-cancelling headphones',
+        fullDescription: 'Bose QC45 with excellent noise cancellation and comfort. Used but in great condition. 24-hour battery, noise-rejecting mics, and premium audio.',
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 14999,
+        rentPrice: 129,
+        discount: 0,
+        rating: 4.6,
+        reviews: 234,
+        warranty: '3 Months',
+        seller: 'AudioHub',
+        tags: ['headphones', 'bose', 'audio', 'used']
+      },
+      {
+        id: 'ELEC-019',
+        name: 'Corsair K95 Platinum Mechanical Keyboard',
+        brand: 'Corsair',
+        category: 'Electronics',
+        subcategory: 'PC Peripherals',
+        condition: 'New',
+        description: 'Premium mechanical gaming keyboard',
+        fullDescription: 'Cherry MX mechanical switches, aluminum frame, and programmable keys. RGB backlighting, premium build quality, and comfortable for long gaming sessions.',
+        image: 'https://images.unsplash.com/photo-1587829191301-41cecf1acb1d?w=400&h=400&fit=crop',
+        buyPrice: 19999,
+        sellPrice: 14999,
+        rentPrice: 149,
+        discount: 10,
+        rating: 4.7,
+        reviews: 1289,
+        warranty: '2 Years',
+        seller: 'Corsair Direct',
+        tags: ['keyboard', 'mechanical', 'gaming', 'premium']
+      },
+      {
+        id: 'ELEC-020',
+        name: 'Logitech MX Master 3S Mouse',
+        brand: 'Logitech',
+        category: 'Electronics',
+        subcategory: 'PC Peripherals',
+        condition: 'New',
+        description: 'Professional ergonomic mouse',
+        fullDescription: 'Advanced ergonomic design with precision tracking, quick gesture buttons, and silent clicking. USB-C charging, multi-device connection, and pro-level precision.',
+        image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=400&h=400&fit=crop',
+        buyPrice: 9999,
+        sellPrice: 7499,
+        rentPrice: 79,
+        discount: 0,
+        rating: 4.8,
+        reviews: 2134,
+        warranty: '2 Years',
+        seller: 'Logitech Store',
+        tags: ['mouse', 'ergonomic', 'professional']
+      },
+      {
+        id: 'ELEC-021',
+        name: 'NVIDIA RTX 4080 Graphics Card',
+        brand: 'NVIDIA',
+        category: 'Electronics',
+        subcategory: 'PC Components',
+        condition: 'New',
+        description: 'High performance graphics card',
+        fullDescription: '16GB GDDR6X, exceptional 4K gaming and 3D rendering performance. PCIe 4.0 interface, advanced cooling system.',
+        image: 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=400&h=400&fit=crop',
+        buyPrice: 89999,
+        sellPrice: 64999,
+        rentPrice: null,
+        discount: 0,
+        rating: 4.8,
+        reviews: 567,
+        warranty: '3 Years',
+        seller: 'NVIDIA Partner',
+        tags: ['gpu', 'rtx', 'gaming', 'performance']
+      },
+      {
+        id: 'ELEC-022',
+        name: 'Intel Core i9-14900KS Processor',
+        brand: 'Intel',
+        category: 'Electronics',
+        subcategory: 'PC Components',
+        condition: 'New',
+        description: 'Latest high-end CPU for extreme performance',
+        fullDescription: '24 cores, 6.2 GHz boost, DDR5 support. Excellent for gaming, rendering, and content creation. LGA1700 socket, 253W TDP.',
+        image: 'https://images.unsplash.com/photo-1591825481303-dd4e5b174c84?w=400&h=400&fit=crop',
+        buyPrice: 79999,
+        sellPrice: 59999,
+        rentPrice: null,
+        discount: 0,
+        rating: 4.9,
+        reviews: 890,
+        warranty: '3 Years',
+        seller: 'Intel Authorized',
+        tags: ['cpu', 'processor', 'performance']
+      },
+      {
+        id: 'ELEC-023',
+        name: 'Samsung 980 Pro 4TB SSD',
+        brand: 'Samsung',
+        category: 'Electronics',
+        subcategory: 'Storage',
+        condition: 'New',
+        description: 'Ultra-fast NVMe SSD storage',
+        fullDescription: '7,100 MB/s read speed, PCIe 4.0, 4TB capacity. Perfect for gaming and content creation. Excellent reliability and warranty.',
+        image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=400&fit=crop',
+        buyPrice: 34999,
+        sellPrice: 24999,
+        rentPrice: null,
+        discount: 15,
+        rating: 4.7,
+        reviews: 1234,
+        warranty: '5 Years',
+        seller: 'Samsung Storage',
+        tags: ['ssd', 'storage', 'nvme']
+      },
+      {
+        id: 'ELEC-024',
+        name: 'Corsair Vengeance DDR5 32GB RAM',
+        brand: 'Corsair',
+        category: 'Electronics',
+        subcategory: 'PC Components',
+        condition: 'New',
+        description: 'High-performance memory for latest systems',
+        fullDescription: '32GB (2x16GB) DDR5 6000MHz, CAS Latency 30. Excellent for gaming and productivity. Heat spreader design, RGB lighting.',
+        image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=400&fit=crop',
+        buyPrice: 12999,
+        sellPrice: 9499,
+        rentPrice: null,
+        discount: 0,
+        rating: 4.6,
+        reviews: 890,
+        warranty: 'Lifetime',
+        seller: 'Corsair Direct',
+        tags: ['ram', 'memory', 'ddr5']
+      },
+      {
+        id: 'ELEC-025',
+        name: 'Philips Hue Smart Lighting Kit',
+        brand: 'Philips',
+        category: 'Electronics',
+        subcategory: 'Smart Home',
+        condition: 'New',
+        description: 'Smart LED lighting system',
+        fullDescription: 'Philips Hue kit with 3 bulbs, smart hub, and dimmer switch. 16 million colors, app control, and voice assistant compatibility.',
+        image: 'https://images.unsplash.com/photo-1565043665747-81f6020a0cf8?w=400&h=400&fit=crop',
+        buyPrice: 8999,
+        sellPrice: 6499,
+        rentPrice: 79,
+        discount: 0,
+        rating: 4.5,
+        reviews: 1567,
+        warranty: '2 Years',
+        seller: 'Philips Store',
+        tags: ['smart-home', 'lighting', 'iot']
+      },
+
+      // Fashion Category (20 products)
+      {
+        id: 'FASH-001',
+        name: 'Nike Air Max 90',
+        brand: 'Nike',
+        category: 'Fashion',
+        subcategory: 'Shoes',
+        condition: 'New',
+        description: 'Classic air cushioned sneaker',
+        fullDescription: 'The iconic Nike Air Max 90 with visible air unit, durable canvas and synthetic leather upper. Available in multiple colors. Comfortable for everyday wear and casual outings.',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
+        buyPrice: 8999,
+        sellPrice: 5999,
+        rentPrice: 99,
+        discount: 10,
+        rating: 4.7,
+        reviews: 2340,
+        warranty: null,
+        seller: 'Nike Store',
+        tags: ['shoes', 'sneaker', 'casual']
+      },
+      {
+        id: 'FASH-002',
+        name: 'Adidas Ultraboost 23',
+        brand: 'Adidas',
+        category: 'Fashion',
+        subcategory: 'Shoes',
+        condition: 'New',
+        description: 'High-performance running shoe',
+        fullDescription: 'Adidas Ultraboost with responsive boost cushioning, primeknit upper, and continental rubber sole. Perfect for running and everyday wear.',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
+        buyPrice: 11999,
+        sellPrice: 7999,
+        rentPrice: 129,
+        discount: 5,
+        rating: 4.6,
+        reviews: 1890,
+        warranty: null,
+        seller: 'Adidas Official',
+        tags: ['shoes', 'running', 'performance']
+      },
+      {
+        id: 'FASH-003',
+        name: 'Levi\'s 501 Blue Jeans',
+        brand: 'Levi\'s',
+        category: 'Fashion',
+        subcategory: 'Denim',
+        condition: 'New',
+        description: 'Timeless denim jeans',
+        fullDescription: 'Classic Levi\'s 501 blue jeans with iconic fit. 100% cotton, zipper fly, and five-pocket styling. A versatile staple for any wardrobe.',
+        image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop',
+        buyPrice: 3999,
+        sellPrice: 2499,
+        rentPrice: 49,
+        discount: 0,
+        rating: 4.8,
+        reviews: 3450,
+        warranty: null,
+        seller: 'Levi\'s Store',
+        tags: ['jeans', 'denim', 'casual']
+      },
+      {
+        id: 'FASH-004',
+        name: 'Tommy Hilfiger Polo Shirt (Used)',
+        brand: 'Tommy Hilfiger',
+        category: 'Fashion',
+        subcategory: 'Shirts',
+        condition: 'Used',
+        description: 'Premium polo shirt in excellent condition',
+        fullDescription: 'Tommy Hilfiger polo in navy blue. Used but maintained well. 100% cotton, classic design, perfect for work or casual outings.',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 799,
+        rentPrice: 29,
+        discount: 0,
+        rating: 4.4,
+        reviews: 123,
+        warranty: null,
+        seller: 'ClothHub',
+        tags: ['shirt', 'polo', 'casual', 'used']
+      },
+      {
+        id: 'FASH-005',
+        name: 'Zara Black Blazer',
+        brand: 'Zara',
+        category: 'Fashion',
+        subcategory: 'Outerwear',
+        condition: 'New',
+        description: 'Elegant black blazer for formal occasions',
+        fullDescription: 'Zara black blazer with tailored fit and premium fabric. Single-breasted design, perfect for business meetings and formal events.',
+        image: 'https://images.unsplash.com/photo-1505221088418-89e791a63e0e?w=400&h=400&fit=crop',
+        buyPrice: 5999,
+        sellPrice: 3999,
+        rentPrice: 199,
+        discount: 20,
+        rating: 4.7,
+        reviews: 567,
+        warranty: null,
+        seller: 'Zara Fashion',
+        tags: ['blazer', 'formal', 'business']
+      },
+      {
+        id: 'FASH-006',
+        name: 'Gucci Loafers',
+        brand: 'Gucci',
+        category: 'Fashion',
+        subcategory: 'Shoes',
+        condition: 'New',
+        description: 'Luxury leather loafers',
+        fullDescription: 'Authentic Gucci horsebit loafers in brown leather. Classic design, comfortable, and suitable for formal and semi-formal occasions.',
+        image: 'https://images.unsplash.com/photo-1543163521-9efcc06b41be?w=400&h=400&fit=crop',
+        buyPrice: 34999,
+        sellPrice: 24999,
+        rentPrice: 349,
+        discount: 0,
+        rating: 4.8,
+        reviews: 456,
+        warranty: null,
+        seller: 'Luxury Fashion',
+        tags: ['shoes', 'luxury', 'leather', 'formal']
+      },
+      {
+        id: 'FASH-007',
+        name: 'H&M Sweater',
+        brand: 'H&M',
+        category: 'Fashion',
+        subcategory: 'Knitwear',
+        condition: 'New',
+        description: 'Comfortable knit sweater',
+        fullDescription: 'H&M grey knit sweater in soft cotton blend. Perfect for casual wear and layering. Available in multiple sizes.',
+        image: 'https://images.unsplash.com/photo-1556821552-5ff63b1ce769?w=400&h=400&fit=crop',
+        buyPrice: 1999,
+        sellPrice: 1299,
+        rentPrice: 39,
+        discount: 15,
+        rating: 4.5,
+        reviews: 890,
+        warranty: null,
+        seller: 'H&M Store',
+        tags: ['sweater', 'knitwear', 'casual']
+      },
+      {
+        id: 'FASH-008',
+        name: 'Prada Backpack',
+        brand: 'Prada',
+        category: 'Fashion',
+        subcategory: 'Bags',
+        condition: 'New',
+        description: 'Luxury nylon backpack',
+        fullDescription: 'Prada triangle logo backpack in black nylon. Multiple compartments, comfortable straps, and premium quality. Ideal for travel or daily use.',
+        image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
+        buyPrice: 89999,
+        sellPrice: 64999,
+        rentPrice: 899,
+        discount: 0,
+        rating: 4.9,
+        reviews: 234,
+        warranty: null,
+        seller: 'Prada Boutique',
+        tags: ['bag', 'backpack', 'luxury', 'travel']
+      },
+      {
+        id: 'FASH-009',
+        name: 'Ray-Ban Sunglasses (Used)',
+        brand: 'Ray-Ban',
+        category: 'Fashion',
+        subcategory: 'Accessories',
+        condition: 'Used',
+        description: 'Classic sunglasses',
+        fullDescription: 'Ray-Ban Aviator sunglasses in excellent condition. UV protection, classic design, used but very well maintained.',
+        image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 2999,
+        rentPrice: 49,
+        discount: 0,
+        rating: 4.6,
+        reviews: 156,
+        warranty: null,
+        seller: 'AccessoryHub',
+        tags: ['sunglasses', 'accessories', 'used']
+      },
+      {
+        id: 'FASH-010',
+        name: 'Fossil Watch',
+        brand: 'Fossil',
+        category: 'Fashion',
+        subcategory: 'Watches',
+        condition: 'New',
+        description: 'Classic analog watch',
+        fullDescription: 'Fossil brown leather watch with stainless steel case. Water-resistant, quartz movement, and timeless design.',
+        image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&fit=crop',
+        buyPrice: 4999,
+        sellPrice: 3499,
+        rentPrice: 79,
+        discount: 10,
+        rating: 4.5,
+        reviews: 678,
+        warranty: '2 Years',
+        seller: 'Watch Store',
+        tags: ['watch', 'accessory', 'classic']
+      },
+      {
+        id: 'FASH-011',
+        name: 'Calvin Klein T-Shirt',
+        brand: 'Calvin Klein',
+        category: 'Fashion',
+        subcategory: 'Shirts',
+        condition: 'New',
+        description: 'Premium basic t-shirt',
+        fullDescription: 'Calvin Klein plain white t-shirt in high-quality cotton. Classic fit, versatile, and perfect for everyday wear.',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+        buyPrice: 1499,
+        sellPrice: 999,
+        rentPrice: 29,
+        discount: 0,
+        rating: 4.6,
+        reviews: 1234,
+        warranty: null,
+        seller: 'Calvin Klein',
+        tags: ['tshirt', 'basic', 'casual']
+      },
+      {
+        id: 'FASH-012',
+        name: 'Nike Sportswear Hoodie',
+        brand: 'Nike',
+        category: 'Fashion',
+        subcategory: 'Outerwear',
+        condition: 'New',
+        description: 'Comfortable sports hoodie',
+        fullDescription: 'Nike grey hoodie with kangaroo pockets and drawstring hood. Soft fleece lining, perfect for casual workouts or lounging.',
+        image: 'https://images.unsplash.com/photo-1578932750294-708d8e8c9f69?w=400&h=400&fit=crop',
+        buyPrice: 3999,
+        sellPrice: 2699,
+        rentPrice: 69,
+        discount: 15,
+        rating: 4.7,
+        reviews: 1567,
+        warranty: null,
+        seller: 'Nike Store',
+        tags: ['hoodie', 'sports', 'casual']
+      },
+      {
+        id: 'FASH-013',
+        name: 'Timberland Boots',
+        brand: 'Timberland',
+        category: 'Fashion',
+        subcategory: 'Shoes',
+        condition: 'New',
+        description: 'Durable work boots',
+        fullDescription: 'Timberland 6-inch premium boots in wheat nubuck. Waterproof, oil and slip-resistant sole. Perfect for work and outdoor activities.',
+        image: 'https://images.unsplash.com/photo-1608549541549-c61c97ae9c59?w=400&h=400&fit=crop',
+        buyPrice: 9999,
+        sellPrice: 6999,
+        rentPrice: 129,
+        discount: 0,
+        rating: 4.8,
+        reviews: 890,
+        warranty: null,
+        seller: 'Timberland Direct',
+        tags: ['boots', 'durable', 'work']
+      },
+      {
+        id: 'FASH-014',
+        name: 'Coach Leather Handbag (Used)',
+        brand: 'Coach',
+        category: 'Fashion',
+        subcategory: 'Bags',
+        condition: 'Used',
+        description: 'Premium leather handbag',
+        fullDescription: 'Coach cognac leather handbag in excellent condition. Used gently, clean interior, perfect for work or casual outings.',
+        image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 6999,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.5,
+        reviews: 234,
+        warranty: null,
+        seller: 'LuxuryHandbags',
+        tags: ['handbag', 'leather', 'luxury', 'used']
+      },
+      {
+        id: 'FASH-015',
+        name: 'Dockers Chino Pants',
+        brand: 'Dockers',
+        category: 'Fashion',
+        subcategory: 'Pants',
+        condition: 'New',
+        description: 'Classic business casual pants',
+        fullDescription: 'Dockers khaki chino pants with comfortable fit. Perfect for office wear, business casual events, and everyday use.',
+        image: 'https://images.unsplash.com/photo-1473966783499-2f2b0a94c1ef?w=400&h=400&fit=crop',
+        buyPrice: 2999,
+        sellPrice: 1999,
+        rentPrice: 59,
+        discount: 0,
+        rating: 4.6,
+        reviews: 567,
+        warranty: null,
+        seller: 'Dockers',
+        tags: ['pants', 'casual', 'business']
+      },
+      {
+        id: 'FASH-016',
+        name: 'Converse Chuck Taylor High Top',
+        brand: 'Converse',
+        category: 'Fashion',
+        subcategory: 'Shoes',
+        condition: 'New',
+        description: 'Iconic canvas sneaker',
+        fullDescription: 'Classic Converse Chuck Taylor all-star in red canvas. Timeless design, comfortable, and perfect for any casual outfit.',
+        image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop',
+        buyPrice: 2999,
+        sellPrice: 1999,
+        rentPrice: 49,
+        discount: 5,
+        rating: 4.7,
+        reviews: 2345,
+        warranty: null,
+        seller: 'Converse Store',
+        tags: ['shoes', 'sneaker', 'casual', 'iconic']
+      },
+      {
+        id: 'FASH-017',
+        name: 'Forever 21 Dress',
+        brand: 'Forever 21',
+        category: 'Fashion',
+        subcategory: 'Dresses',
+        condition: 'New',
+        description: 'Trendy casual dress',
+        fullDescription: 'Forever 21 floral summer dress. Lightweight, comfortable, and perfect for casual outings or parties.',
+        image: 'https://images.unsplash.com/photo-1612336307429-8a88e8d08dbb?w=400&h=400&fit=crop',
+        buyPrice: 1499,
+        sellPrice: 999,
+        rentPrice: 39,
+        discount: 20,
+        rating: 4.4,
+        reviews: 456,
+        warranty: null,
+        seller: 'Forever 21',
+        tags: ['dress', 'casual', 'trendy']
+      },
+      {
+        id: 'FASH-018',
+        name: 'Skechers Comfort Shoes',
+        brand: 'Skechers',
+        category: 'Fashion',
+        subcategory: 'Shoes',
+        condition: 'New',
+        description: 'Memory foam comfort shoes',
+        fullDescription: 'Skechers with memory foam insole for all-day comfort. Perfect for walking, casual outings, and people who prioritize comfort.',
+        image: 'https://images.unsplash.com/photo-1549222582-78c603c3f309?w=400&h=400&fit=crop',
+        buyPrice: 4499,
+        sellPrice: 2999,
+        rentPrice: 79,
+        discount: 10,
+        rating: 4.8,
+        reviews: 1890,
+        warranty: null,
+        seller: 'Skechers Store',
+        tags: ['shoes', 'comfort', 'casual']
+      },
+      {
+        id: 'FASH-019',
+        name: 'Columbia Winter Jacket (Refurbished)',
+        brand: 'Columbia',
+        category: 'Fashion',
+        subcategory: 'Outerwear',
+        condition: 'Refurbished',
+        description: 'Insulated winter jacket',
+        fullDescription: 'Columbia insulated jacket, professionally refurbished. Water-resistant, warm, and perfect for winter activities.',
+        image: 'https://images.unsplash.com/photo-1539533057440-7814a5dc7d48?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 3999,
+        rentPrice: 149,
+        discount: 0,
+        rating: 4.6,
+        reviews: 345,
+        warranty: null,
+        seller: 'RefurbishedGear',
+        tags: ['jacket', 'winter', 'refurbished']
+      },
+      {
+        id: 'FASH-020',
+        name: 'Oakley Sports Sunglasses',
+        brand: 'Oakley',
+        category: 'Fashion',
+        subcategory: 'Accessories',
+        condition: 'New',
+        description: 'Performance sports sunglasses',
+        fullDescription: 'Oakley Holbrook sunglasses with UV protection and polarized lenses. Ideal for sports and outdoor activities.',
+        image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop',
+        buyPrice: 8999,
+        sellPrice: 5999,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.7,
+        reviews: 678,
+        warranty: '1 Year',
+        seller: 'Oakley Store',
+        tags: ['sunglasses', 'sports', 'performance']
+      },
+
+      // Furniture Category (20 products)
+      {
+        id: 'FURN-001',
+        name: 'IKEA BILLY Bookshelf',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Storage',
+        condition: 'New',
+        description: 'White tall bookshelf',
+        fullDescription: 'IKEA BILLY bookshelf in white finish. 5 shelves, perfect for storing books and decorations. Compact design saves space.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 3999,
+        sellPrice: 2499,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.6,
+        reviews: 1234,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['bookshelf', 'storage', 'furniture']
+      },
+      {
+        id: 'FURN-002',
+        name: 'Leather Sofa (Used)',
+        brand: 'Local Maker',
+        category: 'Furniture',
+        subcategory: 'Seating',
+        condition: 'Used',
+        description: 'Premium brown leather sofa',
+        fullDescription: 'Brown leather sofa, 3-seater, excellent condition. Comfortable, spacious, and perfect for living rooms.',
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 24999,
+        rentPrice: 499,
+        discount: 0,
+        rating: 4.7,
+        reviews: 156,
+        warranty: null,
+        seller: 'FurnitureHub',
+        tags: ['sofa', 'leather', 'seating', 'used']
+      },
+      {
+        id: 'FURN-003',
+        name: 'Wooden Dining Table',
+        brand: 'Local Artisan',
+        category: 'Furniture',
+        subcategory: 'Dining',
+        condition: 'New',
+        description: '6-seater dining table',
+        fullDescription: 'Solid wood 6-seater dining table with natural finish. Durable, spacious, and perfect for family meals.',
+        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=400&fit=crop',
+        buyPrice: 18999,
+        sellPrice: 12999,
+        rentPrice: 399,
+        discount: 10,
+        rating: 4.8,
+        reviews: 567,
+        warranty: null,
+        seller: 'Furniture Mart',
+        tags: ['table', 'dining', 'wood']
+      },
+      {
+        id: 'FURN-004',
+        name: 'Ergonomic Office Chair',
+        brand: 'Herman Miller',
+        category: 'Furniture',
+        subcategory: 'Office',
+        condition: 'New',
+        description: 'Premium ergonomic chair',
+        fullDescription: 'Herman Miller Aeron chair with lumbar support, adjustable armrests, and breathable mesh. Perfect for long work hours.',
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop',
+        buyPrice: 34999,
+        sellPrice: 24999,
+        rentPrice: 499,
+        discount: 0,
+        rating: 4.9,
+        reviews: 890,
+        warranty: '2 Years',
+        seller: 'Office Direct',
+        tags: ['chair', 'office', 'ergonomic']
+      },
+      {
+        id: 'FURN-005',
+        name: 'TV Stand',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'TV Stands',
+        condition: 'New',
+        description: 'Modern TV stand for 55" TVs',
+        fullDescription: 'IKEA BESTÅ TV stand in white. Multiple compartments for storage, fits TVs up to 55", modern design.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 7999,
+        sellPrice: 5499,
+        rentPrice: 149,
+        discount: 15,
+        rating: 4.5,
+        reviews: 456,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['tv-stand', 'storage', 'furniture']
+      },
+      {
+        id: 'FURN-006',
+        name: 'Platform Bed Frame (Used)',
+        brand: 'West Elm',
+        category: 'Furniture',
+        subcategory: 'Beds',
+        condition: 'Used',
+        description: 'Queen-size wooden bed',
+        fullDescription: 'West Elm mid-century style bed frame. Queen size, excellent condition, minimal wear. Includes storage drawer.',
+        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 12999,
+        rentPrice: 299,
+        discount: 0,
+        rating: 4.6,
+        reviews: 234,
+        warranty: null,
+        seller: 'FurnitureHub',
+        tags: ['bed', 'bedroom', 'wood', 'used']
+      },
+      {
+        id: 'FURN-007',
+        name: 'Wardrobe Cabinet',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Storage',
+        condition: 'New',
+        description: 'Large storage wardrobe',
+        fullDescription: 'IKEA SUNDSVALL wardrobe with multiple shelves and hanging space. Perfect for bedroom storage.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 9999,
+        sellPrice: 6999,
+        rentPrice: 199,
+        discount: 0,
+        rating: 4.7,
+        reviews: 678,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['wardrobe', 'storage', 'bedroom']
+      },
+      {
+        id: 'FURN-008',
+        name: 'Coffee Table',
+        brand: 'Local Designer',
+        category: 'Furniture',
+        subcategory: 'Living Room',
+        condition: 'New',
+        description: 'Minimalist glass coffee table',
+        fullDescription: 'Modern glass coffee table with tempered glass top and metal frame. Perfect for contemporary living rooms.',
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop',
+        buyPrice: 6999,
+        sellPrice: 4999,
+        rentPrice: 129,
+        discount: 0,
+        rating: 4.6,
+        reviews: 345,
+        warranty: null,
+        seller: 'Design Furniture',
+        tags: ['table', 'coffee', 'modern']
+      },
+      {
+        id: 'FURN-009',
+        name: 'Bookshelves Set (Refurbished)',
+        brand: 'Wayfair',
+        category: 'Furniture',
+        subcategory: 'Storage',
+        condition: 'Refurbished',
+        description: 'Set of 2 corner bookshelves',
+        fullDescription: 'Wayfair corner bookshelves, professionally refurbished. Perfect for maximizing space.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 3999,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.4,
+        reviews: 123,
+        warranty: null,
+        seller: 'Refurbished Furniture',
+        tags: ['bookshelf', 'storage', 'refurbished']
+      },
+      {
+        id: 'FURN-010',
+        name: 'Dining Chairs (Set of 4)',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Seating',
+        condition: 'New',
+        description: 'Wooden dining chairs',
+        fullDescription: 'IKEA INGOLF dining chairs in natural wood. Set of 4, comfortable, perfect for dining tables.',
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop',
+        buyPrice: 8999,
+        sellPrice: 5999,
+        rentPrice: 149,
+        discount: 10,
+        rating: 4.7,
+        reviews: 567,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['chairs', 'dining', 'wood']
+      },
+      {
+        id: 'FURN-011',
+        name: 'Computer Desk',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Office',
+        condition: 'New',
+        description: 'Spacious work desk',
+        fullDescription: 'IKEA BEKANT desk with clean lines and plenty of workspace. Perfect for home office setup.',
+        image: 'https://images.unsplash.com/photo-1533573716505-e3b150fbd001?w=400&h=400&fit=crop',
+        buyPrice: 5999,
+        sellPrice: 3999,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.6,
+        reviews: 456,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['desk', 'office', 'work']
+      },
+      {
+        id: 'FURN-012',
+        name: 'Wall-Mounted Shelf (Used)',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Storage',
+        condition: 'Used',
+        description: 'Compact wall shelves',
+        fullDescription: 'IKEA LACK floating shelves in white. Set of 3, used but in excellent condition.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 999,
+        rentPrice: 29,
+        discount: 0,
+        rating: 4.5,
+        reviews: 234,
+        warranty: null,
+        seller: 'HomeHub',
+        tags: ['shelf', 'wall-mounted', 'storage', 'used']
+      },
+      {
+        id: 'FURN-013',
+        name: 'Reclining Chair',
+        brand: 'La-Z-Boy',
+        category: 'Furniture',
+        subcategory: 'Seating',
+        condition: 'New',
+        description: 'Comfortable recliner chair',
+        fullDescription: 'La-Z-Boy leather recliner with electric controls and heated massage. Ultimate comfort for relaxation.',
+        image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop',
+        buyPrice: 29999,
+        sellPrice: 19999,
+        rentPrice: 399,
+        discount: 0,
+        rating: 4.8,
+        reviews: 678,
+        warranty: '3 Years',
+        seller: 'Comfort Furniture',
+        tags: ['chair', 'recliner', 'comfort']
+      },
+      {
+        id: 'FURN-014',
+        name: 'Kitchen Trolley',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Kitchen',
+        condition: 'New',
+        description: 'Mobile storage trolley',
+        fullDescription: 'IKEA FLYTTA trolley with wheels. Perfect for kitchen storage and organization. Multiple shelves.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 3499,
+        sellPrice: 2299,
+        rentPrice: 69,
+        discount: 5,
+        rating: 4.4,
+        reviews: 345,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['trolley', 'kitchen', 'storage']
+      },
+      {
+        id: 'FURN-015',
+        name: 'Bathroom Cabinet',
+        brand: 'Local Maker',
+        category: 'Furniture',
+        subcategory: 'Bathroom',
+        condition: 'New',
+        description: 'Storage cabinet for bathroom',
+        fullDescription: 'Wooden bathroom cabinet with mirror. Multiple shelves for storage. Modern design.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 4999,
+        sellPrice: 3499,
+        rentPrice: 99,
+        discount: 0,
+        rating: 4.5,
+        reviews: 267,
+        warranty: null,
+        seller: 'HomeFix',
+        tags: ['cabinet', 'bathroom', 'storage']
+      },
+      {
+        id: 'FURN-016',
+        name: 'Bed Side Table (Refurbished)',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Bedroom',
+        condition: 'Refurbished',
+        description: 'Compact bedside table',
+        fullDescription: 'IKEA NESTTUN bedside table, professionally refurbished. Single drawer and shelf.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 1999,
+        rentPrice: 39,
+        discount: 0,
+        rating: 4.3,
+        reviews: 156,
+        warranty: null,
+        seller: 'RefurbishedHome',
+        tags: ['table', 'bedroom', 'refurbished']
+      },
+      {
+        id: 'FURN-017',
+        name: 'Coat Rack Stand',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Entryway',
+        condition: 'New',
+        description: 'Freestanding coat rack',
+        fullDescription: 'IKEA PINNIG coat rack with bench and shoe storage. Perfect for entryways.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 2999,
+        sellPrice: 1999,
+        rentPrice: 49,
+        discount: 0,
+        rating: 4.6,
+        reviews: 345,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['coat-rack', 'entryway', 'storage']
+      },
+      {
+        id: 'FURN-018',
+        name: 'Garden Furniture Set (Used)',
+        brand: 'Local Maker',
+        category: 'Furniture',
+        subcategory: 'Outdoor',
+        condition: 'Used',
+        description: 'Outdoor patio furniture set',
+        fullDescription: 'Wooden garden furniture set with table and 4 chairs. Used but well-maintained. Perfect for outdoor entertaining.',
+        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=400&fit=crop',
+        buyPrice: null,
+        sellPrice: 8999,
+        rentPrice: 199,
+        discount: 0,
+        rating: 4.5,
+        reviews: 189,
+        warranty: null,
+        seller: 'OutdoorHub',
+        tags: ['garden', 'outdoor', 'seating', 'used']
+      },
+      {
+        id: 'FURN-019',
+        name: 'Room Divider',
+        brand: 'IKEA',
+        category: 'Furniture',
+        subcategory: 'Room Dividers',
+        condition: 'New',
+        description: 'Folding room divider screen',
+        fullDescription: 'IKEA RÄVEN room divider in white. Perfect for creating privacy and space division.',
+        image: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=400&h=400&fit=crop',
+        buyPrice: 1999,
+        sellPrice: 1299,
+        rentPrice: 39,
+        discount: 10,
+        rating: 4.4,
+        reviews: 234,
+        warranty: null,
+        seller: 'IKEA Store',
+        tags: ['divider', 'room-divider', 'privacy']
+      },
+      {
+        id: 'FURN-020',
+        name: 'Standing Desk',
+        brand: 'Autonomous',
+        category: 'Furniture',
+        subcategory: 'Office',
+        condition: 'New',
+        description: 'Electric adjustable standing desk',
+        fullDescription: 'Autonomous electric standing desk with memory presets. Height adjustable from 28" to 47". Perfect for ergonomic workspace.',
+        image: 'https://images.unsplash.com/photo-1533573716505-e3b150fbd001?w=400&h=400&fit=crop',
+        buyPrice: 24999,
+        sellPrice: 18999,
+        rentPrice: 299,
+        discount: 0,
+        rating: 4.8,
+        reviews: 567,
+        warranty: '2 Years',
+        seller: 'Office Pro',
+        tags: ['desk', 'standing', 'office', 'adjustable']
+      }
+    ];
+
+    // ===== STATE MANAGEMENT =====
+    let currentMode = 'buy';
+    let currentView = 'home';
+    let cart = [];
+    let wishlist = [];
+    let sellerItems = [];
+    let userRole = 'buyer';
+    let filteredProducts = [];
+    let allProducts = [...PRODUCTS];
+
+    // ===== INITIALIZE =====
+    let dataSdkReady = false;
+    let elementSdkReady = false;
+
+    async function initializeSDKs() {
+      if (window.dataSdk) {
+        const initResult = await window.dataSdk.init({
+          onDataChanged(data) {
+            updateCartWishlist(data);
+          }
+        });
+        dataSdkReady = initResult.isOk;
+      }
+
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig: {
+            app_title: 'ReUseMart',
+            tagline: 'Buy New • Sell Used • Rent Smart'
+          },
+          onConfigChange: async (config) => {
+            document.getElementById('app-title').textContent = config.app_title || 'ReUseMart';
+            document.getElementById('app-tagline').textContent = config.tagline || 'Buy New • Sell Used • Rent Smart';
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['app_title', config.app_title || 'ReUseMart'],
+            ['tagline', config.tagline || 'Buy New • Sell Used • Rent Smart']
+          ])
+        });
+        elementSdkReady = true;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeSDKs();
+      lucide.createIcons();
+      loadCart();
+      loadWishlist();
+      renderHome();
+    });
+
+    // ===== NAVIGATION =====
+    function goHome() {
+      currentView = 'home';
+      renderView();
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      currentView = 'browse';
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.remove('active');
+        if ((idx === 0 && mode === 'buy') || (idx === 1 && mode === 'sell') || (idx === 2 && mode === 'rent')) {
+          btn.classList.add('active');
+        }
+      });
+      renderView();
+    }
+
+    function renderView() {
+      document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
+
+      if (currentView === 'home') {
+        document.getElementById('home-page').classList.remove('hidden');
+        renderTrendingProducts();
+      } else if (currentView === 'browse') {
+        document.getElementById('browse-page').classList.remove('hidden');
+        document.getElementById('browse-title').textContent = currentMode === 'buy' ? 'Buy Products' : currentMode === 'sell' ? 'Sell Products' : 'Rent Products';
+        filteredProducts = [...allProducts];
+        renderProducts();
+      } else if (currentView === 'detail') {
+        document.getElementById('product-detail-page').classList.remove('hidden');
+      } else if (currentView === 'cart') {
+        document.getElementById('cart-page').classList.remove('hidden');
+        renderCart();
+      } else if (currentView === 'wishlist') {
+        document.getElementById('wishlist-page').classList.remove('hidden');
+        renderWishlist();
+      } else if (currentView === 'seller') {
+        document.getElementById('seller-page').classList.remove('hidden');
+        renderSellerDash();
+      } else if (currentView === 'admin') {
+        document.getElementById('admin-page').classList.remove('hidden');
+        renderAdminDash();
+      }
+    }
+
+    // ===== HOME PAGE =====
+    function renderHome() {
+      currentView = 'home';
+      renderView();
+    }
+
+    function renderTrendingProducts() {
+      const trending = allProducts.slice(0, 8);
+      const html = trending.map(p => createProductCard(p)).join('');
+      document.getElementById('trending-products').innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // ===== PRODUCT RENDERING =====
+    function createProductCard(product) {
+      const price = currentMode === 'buy' ? product.buyPrice : currentMode === 'sell' ? product.sellPrice : product.rentPrice;
+      const priceLabel = currentMode === 'buy' ? '₹' : currentMode === 'sell' ? '₹' : '₹/day';
+      const inWishlist = wishlist.some(w => w.id === product.id);
+
+      if (!price) return '';
+
+      return `
+        <div class="product-card animate-slide-in">
+          <div class="relative overflow-hidden h-48 bg-gray-100">
+            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover" loading="lazy" 
+                 onerror="this.src='https://via.placeholder.com/220x200?text=${product.category}'">
+            ${product.discount > 0 ? `<div class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-bold">${product.discount}% OFF</div>` : ''}
+            <button onclick="addToWishlist('${product.id}')" class="absolute top-2 left-2 bg-white rounded-full p-2 hover:bg-red-50 transition">
+              <i data-lucide="heart" style="width: 20px; height: 20px; color: ${inWishlist ? 'red' : '#999'};"></i>
+            </button>
+          </div>
+          <div class="p-4">
+            <p class="text-xs text-gray-500 mb-1">${product.brand}</p>
+            <h3 class="font-bold text-sm mb-2 line-clamp-2 cursor-pointer hover:text-blue-600" onclick="viewProductDetail('${product.id}')">${product.name}</h3>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="rating">⭐ ${product.rating}</span>
+              <span class="text-xs text-gray-600">(${product.reviews})</span>
+            </div>
+            <div class="price-display mb-3">
+              <span class="price-current">${priceLabel}${price.toLocaleString()}</span>
+              ${product.discount > 0 ? `<span class="price-savings">Save ${product.discount}%</span>` : ''}
+            </div>
+            <div class="flex gap-2">
+              ${currentMode === 'buy' ? `<button onclick="quickBuy('${product.id}')" class="flex-1 btn-primary text-sm">Buy</button>` : ''}
+              ${currentMode === 'buy' ? `<button onclick="addToCart('${product.id}')" class="flex-1 btn-secondary text-sm">Cart</button>` : ''}
+              ${currentMode === 'sell' ? `<button onclick="viewProductDetail('${product.id}')" class="flex-1 btn-primary text-sm">View</button>` : ''}
+              ${currentMode === 'rent' ? `<button onclick="rentProduct('${product.id}')" class="flex-1 btn-primary text-sm">Rent</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('products-container');
+      const html = filteredProducts.map(p => createProductCard(p)).join('');
+
+      if (html === '') {
+        document.getElementById('no-products').classList.remove('hidden');
+        container.innerHTML = '';
+      } else {
+        document.getElementById('no-products').classList.add('hidden');
+        container.innerHTML = html;
+      }
+      lucide.createIcons();
+    }
+
+    // ===== FILTERS =====
+    function filterByCategory(category) {
+      currentView = 'browse';
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.remove('active');
+        btn.classList.add('active', idx === 0);
+      });
+      currentMode = 'buy';
+      filteredProducts = allProducts.filter(p => p.category === category);
+      renderView();
+    }
+
+    function applyFilters() {
+      const categories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).filter(cb => ['Electronics', 'Fashion', 'Furniture', 'Books', 'Vehicles', 'Home Appliances'].includes(cb.value)).map(cb => cb.value);
+      const maxPrice = parseInt(document.getElementById('price-filter').value);
+      document.getElementById('price-display').textContent = '₹' + maxPrice.toLocaleString();
+      const conditions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).filter(cb => ['New', 'Used', 'Refurbished'].includes(cb.value)).map(cb => cb.value);
+      const ratings = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).filter(cb => ['3.5', '4', '4.5'].includes(cb.value)).map(cb => parseFloat(cb.value));
+
+      filteredProducts = allProducts.filter(p => {
+        const priceField = currentMode === 'buy' ? 'buyPrice' : currentMode === 'sell' ? 'sellPrice' : 'rentPrice';
+        const price = p[priceField];
+        return (!categories.length || categories.includes(p.category)) &&
+               (price && price <= maxPrice) &&
+               (!conditions.length || conditions.includes(p.condition)) &&
+               (!ratings.length || ratings.some(r => p.rating >= r));
+      });
+
+      renderProducts();
+    }
+
+    function clearFilters() {
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('price-filter').value = '100000';
+      applyFilters();
+    }
+
+    function handleSearch() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      if (query === '') {
+        filteredProducts = [...allProducts];
+      } else {
+        filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+      }
+      renderProducts();
+    }
+
+    function handleSort(sortBy) {
+      sortBy = event?.target?.value || sortBy;
+      switch(sortBy) {
+        case 'price-low':
+          filteredProducts.sort((a, b) => (a.buyPrice || a.sellPrice) - (b.buyPrice || b.sellPrice));
+          break;
+        case 'price-high':
+          filteredProducts.sort((a, b) => (b.buyPrice || b.sellPrice) - (a.buyPrice || a.sellPrice));
+          break;
+        case 'rating':
+          filteredProducts.sort((a, b) => b.rating - a.rating);
+          break;
+        case 'newest':
+          filteredProducts.sort((a, b) => b.id.localeCompare(a.id));
+          break;
+        default:
+          break;
+      }
+      renderProducts();
+    }
+
+    // ===== PRODUCT DETAILS =====
+    function viewProductDetail(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+
+      currentView = 'detail';
+      document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden'));
+      document.getElementById('product-detail-page').classList.remove('hidden');
+
+      const price = currentMode === 'buy' ? product.buyPrice : currentMode === 'sell' ? product.sellPrice : product.rentPrice;
+      const originalPrice = currentMode === 'buy' ? product.buyPrice : product.sellPrice;
+
+      document.getElementById('detail-image').src = product.image;
+      document.getElementById('detail-name').textContent = product.name;
+      document.getElementById('detail-rating').innerHTML = `⭐ ${product.rating} / 5`;
+      document.getElementById('detail-reviews').textContent = product.reviews;
+      document.getElementById('detail-seller').textContent = `by ${product.seller}`;
+      document.getElementById('detail-brand').textContent = product.brand;
+      document.getElementById('detail-category').textContent = `${product.category} > ${product.subcategory}`;
+      document.getElementById('detail-condition').textContent = product.condition;
+      document.getElementById('detail-warranty').textContent = product.warranty || 'No warranty';
+      document.getElementById('detail-desc').textContent = product.fullDescription || product.description;
+
+      let priceHtml = `<div class="price-display">`;
+      if (currentMode === 'buy' && product.discount > 0) {
+        const savings = Math.round(originalPrice * (product.discount / 100));
+        priceHtml += `<span class="price-original">₹${originalPrice.toLocaleString()}</span><span class="price-current">₹${price.toLocaleString()}</span><span class="price-savings">Save ${product.discount}%</span>`;
+      } else {
+        priceHtml += `<span class="price-current">₹${price?.toLocaleString() || 'N/A'}</span>`;
+      }
+      priceHtml += '</div>';
+      document.getElementById('detail-price').innerHTML = priceHtml;
+
+      let badgesHtml = '';
+      if (product.condition !== 'New') badgesHtml += `<span class="badge badge-warning">${product.condition}</span>`;
+      if (currentMode === 'buy' && product.discount > 0) badgesHtml += `<span class="badge badge-success">${product.discount}% Off</span>`;
+      document.getElementById('detail-badges').innerHTML = badgesHtml;
+
+      let actionsHtml = '';
+      if (currentMode === 'buy') {
+        actionsHtml = `
+          <button onclick="quickBuy('${product.id}')" class="flex-1 btn-primary">Buy Now</button>
+          <button onclick="addToCart('${product.id}')" class="flex-1 btn-secondary">Add to Cart</button>
+        `;
+      } else if (currentMode === 'rent') {
+        actionsHtml = `<button onclick="rentProduct('${product.id}')" class="flex-1 btn-primary">Rent Now</button>`;
+      }
+      document.getElementById('detail-actions').innerHTML = actionsHtml;
+
+      // Reviews
+      const reviewsHtml = `
+        <div class="border-b pb-4">
+          <p class="font-bold mb-2">⭐ ${product.rating} out of 5</p>
+          <p class="text-gray-600 text-sm">Based on ${product.reviews} verified purchases</p>
+        </div>
+        <div>
+          <p class="font-bold mb-3">Top Review</p>
+          <p class="text-gray-700">Great quality and fast delivery. Highly recommended!</p>
+          <p class="text-xs text-gray-500 mt-2">— Verified Buyer</p>
+        </div>
+      `;
+      document.getElementById('detail-reviews-list').innerHTML = reviewsHtml;
+
+      lucide.createIcons();
+    }
+
+    // ===== CART & WISHLIST =====
+    function addToCart(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      const qty = parseInt(document.getElementById('detail-qty')?.value || 1);
+
+      if (cart.find(c => c.id === productId)) {
+        showToast('Already in cart! View cart to update quantity.');
+        return;
+      }
+
+      cart.push({
+        id: productId,
+        name: product.name,
+        price: currentMode === 'buy' ? product.buyPrice : product.sellPrice,
+        quantity: qty,
+        image: product.image
+      });
+
+      saveCarts();
+      showToast('✓ Added to cart!');
+    }
+
+    function quickBuy(productId) {
+      addToCart(productId);
+      setTimeout(() => toggleCart(), 500);
+    }
+
+    function rentProduct(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      showToast(`✓ Rental request created for ${product.name}`);
+    }
+
+    function addToWishlist(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (wishlist.find(w => w.id === productId)) {
+        wishlist = wishlist.filter(w => w.id !== productId);
+        showToast('❤ Removed from wishlist');
+      } else {
+        wishlist.push({ id: productId, name: product.name, image: product.image, price: currentMode === 'buy' ? product.buyPrice : product.sellPrice });
+        showToast('❤ Added to wishlist!');
+      }
+      saveCarts();
+      updateBadges();
+    }
+
+    function saveCarts() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+      updateBadges();
+    }
+
+    function loadCart() {
+      cart = JSON.parse(localStorage.getItem('cart')) || [];
+      updateBadges();
+    }
+
+    function loadWishlist() {
+      wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      updateBadges();
+    }
+
+    function updateBadges() {
+      document.getElementById('cart-badge').textContent = cart.length;
+      document.getElementById('wishlist-badge').textContent = wishlist.length;
+    }
+
+    function updateCartWishlist(data) {
+      // Handle data SDK updates if needed
+    }
+
+    // ===== CART PAGE =====
+    function renderCart() {
+      if (cart.length === 0) {
+        document.getElementById('empty-cart').classList.remove('hidden');
+        document.getElementById('cart-items').innerHTML = '';
+      } else {
+        document.getElementById('empty-cart').classList.add('hidden');
+        const html = cart.map(item => `
+          <div class="flex gap-4 pb-6 border-b">
+            <img src="${item.image}" alt="${item.name}" class="w-24 h-24 object-cover rounded-lg" loading="lazy">
+            <div class="flex-1">
+              <h3 class="font-bold">${item.name}</h3>
+              <p class="text-gray-600">₹${item.price.toLocaleString()}</p>
+              <div class="flex gap-2 mt-3">
+                <button onclick="updateCartQty('${item.id}', -1)" class="px-3 py-1 border rounded">−</button>
+                <input type="number" value="${item.quantity}" onchange="updateCartQty('${item.id}', this.value)" class="w-12 px-2 border rounded text-center">
+                <button onclick="updateCartQty('${item.id}', 1)" class="px-3 py-1 border rounded">+</button>
+                <button onclick="removeFromCart('${item.id}')" class="ml-auto px-3 py-1 bg-red-100 text-red-600 rounded font-bold">Remove</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        document.getElementById('cart-items').innerHTML = html;
+      }
+
+      updateCartSummary();
+    }
+
+    function updateCartQty(productId, change) {
+      const item = cart.find(c => c.id === productId);
+      if (item) {
+        const newQty = typeof change === 'string' ? parseInt(change) : item.quantity + change;
+        if (newQty > 0) {
+          item.quantity = newQty;
+          saveCarts();
+          renderCart();
+        }
+      }
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(c => c.id !== productId);
+      saveCarts();
+      renderCart();
+      showToast('Removed from cart');
+    }
+
+    function updateCartSummary() {
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const discount = Math.round(subtotal * 0.05);
+      const total = subtotal - discount;
+
+      document.getElementById('subtotal').textContent = '₹' + subtotal.toLocaleString();
+      document.getElementById('discount').textContent = '−₹' + discount.toLocaleString();
+      document.getElementById('total').textContent = '₹' + total.toLocaleString();
+    }
+
+    function checkout() {
+      showToast('✓ Order placed! (Demo - Razorpay integration in production)');
+      cart = [];
+      saveCarts();
+      setTimeout(() => goHome(), 1000);
+    }
+
+    // ===== WISHLIST PAGE =====
+    function renderWishlist() {
+      if (wishlist.length === 0) {
+        document.getElementById('empty-wishlist').classList.remove('hidden');
+        document.getElementById('wishlist-items').innerHTML = '';
+      } else {
+        document.getElementById('empty-wishlist').classList.add('hidden');
+        const html = wishlist.map(item => `
+          <div class="product-card">
+            <div class="h-48 bg-gray-100">
+              <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" loading="lazy">
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold mb-2">${item.name}</h3>
+              <p class="text-lg font-bold text-orange-600 mb-4">₹${item.price?.toLocaleString()}</p>
+              <div class="flex gap-2">
+                <button onclick="addToCart('${item.id}')" class="flex-1 btn-primary text-sm">Add to Cart</button>
+                <button onclick="addToWishlist('${item.id}')" class="flex-1 btn-outline text-sm">Remove</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        document.getElementById('wishlist-items').innerHTML = html;
+      }
+    }
+
+    // ===== CART & WISHLIST TOGGLES =====
+    function toggleCart() {
+      currentView = 'cart';
+      renderView();
+    }
+
+    function toggleWishlist() {
+      currentView = 'wishlist';
+      renderView();
+    }
+
+    // ===== SELLER DASHBOARD =====
+    function renderSellerDash() {
+      document.getElementById('seller-listings').textContent = sellerItems.length;
+      document.getElementById('seller-sales').textContent = '₹' + (sellerItems.reduce((sum, item) => sum + (item.sellPrice || 0), 0)).toLocaleString();
+      document.getElementById('seller-orders').textContent = Math.floor(sellerItems.length * 1.5);
+
+      const html = sellerItems.map(item => `
+        <div class="product-card">
+          <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold">${item.name}</h3>
+            <p class="text-sm text-gray-600 mb-2">${item.category}</p>
+            <p class="text-lg font-bold text-green-600 mb-3">₹${item.sellPrice?.toLocaleString()}</p>
+            <div class="flex gap-2">
+              <button class="flex-1 btn-secondary text-sm">Edit</button>
+              <button class="flex-1 btn-outline text-sm">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('seller-items').innerHTML = html || '<p class="col-span-full text-center text-gray-600">No items listed yet</p>';
+    }
+
+    function addSellerItem(e) {
+      e.preventDefault();
+
+      const newItem = {
+        id: 'SELL-' + Date.now(),
+        name: document.getElementById('seller-name').value,
+        brand: document.getElementById('seller-brand').value,
+        category: document.getElementById('seller-category').value,
+        condition: document.getElementById('seller-condition').value,
+        buyPrice: parseInt(document.getElementById('seller-buy-price').value) || null,
+        sellPrice: parseInt(document.getElementById('seller-sell-price').value) || null,
+        rentPrice: parseInt(document.getElementById('seller-rent-price').value) || null,
+        description: document.getElementById('seller-description').value,
+        fullDescription: document.getElementById('seller-description').value,
+        image: 'https://via.placeholder.com/400?text=' + encodeURIComponent(document.getElementById('seller-name').value),
+        rating: 4.5,
+        reviews: 0,
+        warranty: null,
+        seller: 'You',
+        tags: []
+      };
+
+      sellerItems.push(newItem);
+      allProducts.push(newItem);
+
+      e.target.reset();
+      showToast('✓ Item listed successfully!');
+      renderSellerDash();
+    }
+
+    function increaseQty() {
+      const input = document.getElementById('detail-qty');
+      input.value = parseInt(input.value) + 1;
+    }
+
+    function decreaseQty() {
+      const input = document.getElementById('detail-qty');
+      if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+      }
+    }
+
+    function showDetailImage(img) {
+      document.getElementById('detail-image').src = img.src;
+    }
+
+    // ===== ADMIN DASHBOARD =====
+    function renderAdminDash() {
+      document.getElementById('admin-products').textContent = allProducts.length;
+      lucide.createIcons();
+    }
+
+    // ===== USER MENU =====
+    function toggleUser() {
+      document.getElementById('user-modal').classList.toggle('active');
+    }
+
+    function switchUserRole(role) {
+      userRole = role;
+      document.getElementById('user-email').textContent = role === 'buyer' ? 'customer@example.com' : role === 'seller' ? 'seller@example.com' : 'admin@example.com';
+
+      if (role === 'seller') {
+        currentView = 'seller';
+      } else if (role === 'admin') {
+        currentView = 'admin';
+      } else {
+        currentView = 'home';
+      }
+
+      toggleUser();
+      renderView();
+    }
+
+    function logout() {
+      userRole = 'buyer';
+      currentView = 'home';
+      toggleUser();
+      renderView();
+      showToast('✓ Logged out');
+    }
+
+    // ===== TOAST NOTIFICATION =====
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e173f76e3b4c6ab',t:'MTc3NDM3MTc5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
